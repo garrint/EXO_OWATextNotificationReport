@@ -235,7 +235,7 @@
     $ResultsList | Select PrimarySmtpAddress,Identity,NotificationPhoneNumber,NotificationPhoneNumberVerified
 	$ResultsList.Clear()
 
-# Get Data from EXO and populate arrays 
+# Get Data from EXO to populate arrays and hashtable, while trying to calculate estimated completion
 	# Update Log
         $progressActions = $exombxlist.count
         Write-Log ("Starting data collection");Write-Log ("Exchange Online mailboxes being checked: " + ($progressActions));Write-Log ("Elapsed time to collect data from Get-TextMessagingAccount: " + ($($invokeElapsedTime)))
