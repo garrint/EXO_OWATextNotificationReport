@@ -19,19 +19,19 @@
 # https://www.microsoft.com/en-us/legal/intellectualproperty/copyright/default.aspx.
 #
 # SCRIPT:  Exchange Online- Get OWA Text Notifications In Use
-#  -Dependent on EXOv2 module: (https://www.powershellgallery.com/packages/ExchangeOnlineManagement)
+#  -Requires EXOv2 module: (https://www.powershellgallery.com/packages/ExchangeOnlineManagement)
 #
 #  EXO_OWATextNotificationsInUse_1.1.ps1
-#  - Download latest version from https://github.com/garrint 
+#  - Download latest version from https://github.com/garrint/EXO_OWATextNotificationReport 
 #  
 #  Created by: Garrin Thompson 9/15/2020 garrint@microsoft.com *** 
 #
 ################################################################################################
 # This script checks all mailbox recipients provided in an import file with a PrimarySmtpAddress 
 #   attribute available/populated for the value of $true in the Get-TextMessagingAccount
-#   for the attribute: NotificationPhoneNumberVerified.  If True, we gather relevant information.
+#   for the attribute: NotificationPhoneNumberVerified. If True, we gather relevant information.
 #
-# The output can be used to target the users with OWA Text Notification enabled for communication 
+# The output can be used to target users who have OWA Text Notifications enabled with an email 
 #   about the deprecation of this feature in coming weeks.
 ################################################################################################
 
@@ -87,8 +87,6 @@
         
         # Create the session
         Write-Log ("Creating new PS Session")
-            #OLD BasicAuth method create session
-                #$Exchangesession = New-PSSession -ConfigurationName Microsoft.Exchange -ConnectionUri "https://outlook.office365.com/powershell-liveid/" -Credential $Credential -Authentication Basic -AllowRedirection
         # Check for an error while creating the session
             If ($Error.Count -gt 0){
                 Write-log ("[ERROR] - Error while setting up session")
@@ -108,12 +106,10 @@
                 # Attempt to set up the sesion again
                 New-CleanO365Session
             }
-        
-        # If the session setup worked then we need to set $errorcount to 0
-        else {
-            $ErrorCount = 0
-        }
-        
+            # If the session setup worked then we need to set $errorcount to 0
+            Else {
+                $ErrorCount = 0
+            }
         # Import the PS session/connect to EXO
         $null = Connect-ExchangeOnline -UserPrincipalName $EXOLogonUPN -ShowProgress:$false -ShowBanner:$false
         # Set the Start time for the current session
