@@ -111,9 +111,9 @@
                 $ErrorCount = 0
             }
         # Import the PS session/connect to EXO
-        $null = Connect-ExchangeOnline -UserPrincipalName $EXOLogonUPN -ShowProgress:$false -ShowBanner:$false
+            $null = Connect-ExchangeOnline -UserPrincipalName $EXOLogonUPN -DelegatedOrganization $EXOtenant -ShowProgress:$false -ShowBanner:$false
         # Set the Start time for the current session
-        Set-Variable -Scope script -Name SessionStartTime -Value (Get-Date)
+            Set-Variable -Scope script -Name SessionStartTime -Value (Get-Date)
     }
 
 # Verifies that the connection is healthy; Resets it every "$ResetSeconds" number of seconds (14.5 mins) either way 
@@ -178,7 +178,7 @@
 	$outputfilename = 'EXO_Script_Output_'
 	$execpol = get-executionpolicy
 	Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process -Force  #this is just for the session running this script
-	Write-Host; $EXOLogonUPN=Read-host "Type in UPN for account that will execute this script"; write-host "...pleasewait...connecting to EXO..."
+	Write-Host;$EXOLogonUPN=Read-host "Type in UPN for account that will execute this script";$EXOtenant=Read-host "Type in your tenant domain name (eg <domain>.onmicrosoft.com)";write-host "...pleasewait...connecting to EXO..."
 	$SmtpCreds = (get-credential -Message "Provide EXO account Pasword" -UserName "$EXOLogonUPN")
 	# Set $OutputFolder to Current PowerShell Directory
 	[IO.Directory]::SetCurrentDirectory((Convert-Path (Get-Location -PSProvider FileSystem)))
@@ -207,7 +207,7 @@
 
 # Import MailboxList CSV
 	Write-Progress -Id 1 -Activity "Importing all EXO UserMailboxes" -PercentComplete (15) -Status "Import-Csv"
-	$exombxlist = Import-Csv c:\temp\allexombxs.csv
+	$exombxlist = Import-Csv $outputFolder\allexombxs.csv
 
 # Set a counter and some variables to use for periodic write/flush and reporting for loop to create Hashtable
 	$currentProgress = 1
@@ -271,7 +271,7 @@
             }
         # Test for NotificationPhoneNumberVerified = $true, Get-TextMessagingAccount
             $TexterList = $null
-            If ((Get-TextMessagingAccount $mbx.PrimarySmtpAddress).NotificationPhoneNumberVerified) {
+            If (!(Get-TextMessagingAccount $mbx.PrimarySmtpAddress).NotificationPhoneNumberVerified) {
                 $TexterList = Get-TextMessagingAccount $mbx.PrimarySmtpAddress | Select-Object @{n='PrimarySmtpAddress';e={$mbx.PrimarySmtpAddress}},Identity,NotificationPhoneNumber,NotificationPhoneNumberVerified
                 # Update the pivotal index Hashtable (using shorthand notation for add-member)
                     $line = @{
